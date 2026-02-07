@@ -27,10 +27,26 @@ const Index = () => {
     const videosByYouTuber = getVideosByDate(selectedDate);
     
     if (selectedYouTuber) {
-      return videosByYouTuber[selectedYouTuber] || [];
+      const youtuber = YOUTUBERS.find(yt => yt.id === selectedYouTuber);
+      return (videosByYouTuber[selectedYouTuber] || []).map(v => ({
+        ...v,
+        _youtuberName: youtuber?.displayName || ''
+      }));
     }
     
-    return Object.values(videosByYouTuber).flat();
+    // Flatten all videos and add YouTuber name
+    const allVideos: Array<VideoSummary & { _youtuberName: string }> = [];
+    Object.entries(videosByYouTuber).forEach(([ytId, vids]) => {
+      const youtuber = YOUTUBERS.find(yt => yt.id === ytId);
+      vids.forEach(v => {
+        allVideos.push({
+          ...v,
+          _youtuberName: youtuber?.displayName || ''
+        });
+      });
+    });
+    
+    return allVideos;
   }, [selectedDate, selectedYouTuber]);
 
   const videoCounts = useMemo(() => {
@@ -148,6 +164,7 @@ const Index = () => {
                     key={`${video.video_id}-${index}`} 
                     video={video} 
                     language={language}
+                    youtuberName={(video as any)._youtuberName}
                   />
                 ))}
               </div>
