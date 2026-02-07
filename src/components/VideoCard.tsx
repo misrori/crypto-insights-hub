@@ -1,4 +1,4 @@
-import { ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ExternalLink, TrendingUp, TrendingDown, Minus, User } from 'lucide-react';
 import { VideoSummary } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 interface VideoCardProps {
   video: VideoSummary;
   language?: 'hu' | 'en';
+  youtuberName?: string;
 }
 
-export const VideoCard = ({ video, language = 'hu' }: VideoCardProps) => {
+export const VideoCard = ({ video, language = 'hu', youtuberName }: VideoCardProps) => {
   const getSentimentIcon = () => {
     switch (video.crypto_sentiment) {
       case 'Bullish':
@@ -51,9 +52,18 @@ export const VideoCard = ({ video, language = 'hu' }: VideoCardProps) => {
             <h3 className="font-display font-semibold text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
               {video.title}
             </h3>
-            <span className="text-sm text-muted-foreground">
-              {formatTime(video.published_at)}
-            </span>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span>{formatTime(video.published_at)}</span>
+              {youtuberName && (
+                <>
+                  <span className="text-border">•</span>
+                  <span className="flex items-center gap-1.5 text-primary/80">
+                    <User className="h-3.5 w-3.5" />
+                    {youtuberName}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
           
           <a

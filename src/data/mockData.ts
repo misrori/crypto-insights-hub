@@ -268,6 +268,204 @@ export const mockVideos: Record<string, Record<string, VideoSummary[]>> = {
         main_topics: ['Market Recap', 'Weekly Analysis']
       }
     ]
+  },
+  '2026-02-03': {
+    'CTOLARSSON': [
+      {
+        video_id: 'vid030301',
+        title: 'Bitcoin Dominance Analysis',
+        published_at: '2026-02-03T11:30:00Z',
+        sort_date: '2026-02-03',
+        url: 'https://www.youtube.com/watch?v=vid030301',
+        summary_hu: 'A Bitcoin dominancia elemzése és annak hatása az altcoinokra.',
+        summary_en: 'Bitcoin dominance analysis and its impact on altcoins.',
+        crypto_sentiment: 'Neutral',
+        sentiment_score: 55,
+        key_points_hu: [
+          'A Bitcoin dominancia 48% körül stabilizálódott.',
+          'Az altcoinok gyengén teljesítenek.',
+          'A piac konszolidációs fázisban van.'
+        ],
+        key_points_en: [
+          'Bitcoin dominance has stabilized around 48%.',
+          'Altcoins are underperforming.',
+          'The market is in a consolidation phase.'
+        ],
+        main_topics: ['Bitcoin Dominance', 'Market Structure']
+      }
+    ],
+    'DataDispatch': [
+      {
+        video_id: 'vid030302',
+        title: 'Tech Stocks vs Crypto: Which is Better?',
+        published_at: '2026-02-03T14:00:00Z',
+        sort_date: '2026-02-03',
+        url: 'https://www.youtube.com/watch?v=vid030302',
+        summary_hu: 'Tech részvények és kripto összehasonlítása befektetési szempontból.',
+        summary_en: 'Comparing tech stocks and crypto from an investment perspective.',
+        crypto_sentiment: 'Neutral',
+        sentiment_score: 50,
+        key_points_hu: [
+          'Mindkét eszközosztály volatilis.',
+          'A diverzifikáció kulcsfontosságú.',
+          'Hosszú távú potenciál mindkettőben van.'
+        ],
+        key_points_en: [
+          'Both asset classes are volatile.',
+          'Diversification is key.',
+          'Long-term potential exists in both.'
+        ],
+        main_topics: ['Investment Comparison', 'Portfolio Strategy']
+      }
+    ]
+  },
+  '2026-02-02': {
+    'IvanOnTech': [
+      {
+        video_id: 'vid020201',
+        title: 'Solana Network Updates Explained',
+        published_at: '2026-02-02T09:15:00Z',
+        sort_date: '2026-02-02',
+        url: 'https://www.youtube.com/watch?v=vid020201',
+        summary_hu: 'A Solana hálózat legújabb frissítéseinek magyarázata.',
+        summary_en: 'Explanation of the latest Solana network updates.',
+        crypto_sentiment: 'Bullish',
+        sentiment_score: 75,
+        key_points_hu: [
+          'A Solana teljesítménye jelentősen javult.',
+          'Az új frissítések stabilabbá teszik a hálózatot.',
+          'A fejlesztői aktivitás növekszik.'
+        ],
+        key_points_en: [
+          'Solana performance has improved significantly.',
+          'New updates make the network more stable.',
+          'Developer activity is increasing.'
+        ],
+        main_topics: ['Solana', 'Network Updates']
+      }
+    ],
+    'DavidCarbutt': [
+      {
+        video_id: 'vid020202',
+        title: 'The Future of DeFi in 2026',
+        published_at: '2026-02-02T15:30:00Z',
+        sort_date: '2026-02-02',
+        url: 'https://www.youtube.com/watch?v=vid020202',
+        summary_hu: 'A DeFi jövője 2026-ban: trendek és előrejelzések.',
+        summary_en: 'The future of DeFi in 2026: trends and predictions.',
+        crypto_sentiment: 'Bullish',
+        sentiment_score: 80,
+        key_points_hu: [
+          'A DeFi TVL növekedése folytatódik.',
+          'Új innovatív protokollok jelennek meg.',
+          'A szabályozás tisztább lesz.'
+        ],
+        key_points_en: [
+          'DeFi TVL growth continues.',
+          'New innovative protocols are emerging.',
+          'Regulation is becoming clearer.'
+        ],
+        main_topics: ['DeFi', 'Future Predictions']
+      }
+    ],
+    'elliotrades_official': [
+      {
+        video_id: 'vid020203',
+        title: 'Top 5 Gaming Tokens to Watch',
+        published_at: '2026-02-02T18:00:00Z',
+        sort_date: '2026-02-02',
+        url: 'https://www.youtube.com/watch?v=vid020203',
+        summary_hu: 'Az 5 legjobb gaming token, amit érdemes figyelni.',
+        summary_en: 'Top 5 gaming tokens to watch.',
+        crypto_sentiment: 'Bullish',
+        sentiment_score: 72,
+        key_points_hu: [
+          'A gaming szektor növekszik a kriptóban.',
+          'Új játékok indulnak blockchain technológiával.',
+          'A play-to-earn modell fejlődik.'
+        ],
+        key_points_en: [
+          'The gaming sector is growing in crypto.',
+          'New games are launching with blockchain technology.',
+          'The play-to-earn model is evolving.'
+        ],
+        main_topics: ['Gaming Tokens', 'Crypto Gaming']
+      }
+    ]
+  },
+  '2026-02-01': {
+    'CTOLARSSON': [
+      {
+        video_id: 'vid010101',
+        title: 'February Market Outlook',
+        published_at: '2026-02-01T10:00:00Z',
+        sort_date: '2026-02-01',
+        url: 'https://www.youtube.com/watch?v=vid010101',
+        summary_hu: 'Februári piaci kilátások és várakozások.',
+        summary_en: 'February market outlook and expectations.',
+        crypto_sentiment: 'Bullish',
+        sentiment_score: 70,
+        key_points_hu: [
+          'A piac pozitív hangulatban indul.',
+          'A Bitcoin stabilizálódott.',
+          'Növekvő intézményi érdeklődés.'
+        ],
+        key_points_en: [
+          'The market starts with positive sentiment.',
+          'Bitcoin has stabilized.',
+          'Growing institutional interest.'
+        ],
+        main_topics: ['Market Outlook', 'February Analysis']
+      }
+    ],
+    'coingecko': [
+      {
+        video_id: 'vid010102',
+        title: 'Monthly Crypto Report: January Highlights',
+        published_at: '2026-02-01T08:00:00Z',
+        sort_date: '2026-02-01',
+        url: 'https://www.youtube.com/watch?v=vid010102',
+        summary_hu: 'Havi kripto jelentés: januári összefoglaló.',
+        summary_en: 'Monthly crypto report: January highlights.',
+        crypto_sentiment: 'Neutral',
+        sentiment_score: 55,
+        key_points_hu: [
+          'Január vegyes eredményeket hozott.',
+          'A Bitcoin 10%-ot emelkedett.',
+          'Az NFT piac lassult.'
+        ],
+        key_points_en: [
+          'January brought mixed results.',
+          'Bitcoin rose 10%.',
+          'The NFT market slowed down.'
+        ],
+        main_topics: ['Monthly Report', 'January Review']
+      }
+    ],
+    'IvanOnTech': [
+      {
+        video_id: 'vid010103',
+        title: 'Layer 2 Revolution: zkSync and StarkNet',
+        published_at: '2026-02-01T12:30:00Z',
+        sort_date: '2026-02-01',
+        url: 'https://www.youtube.com/watch?v=vid010103',
+        summary_hu: 'Layer 2 forradalom: zkSync és StarkNet elemzés.',
+        summary_en: 'Layer 2 revolution: zkSync and StarkNet analysis.',
+        crypto_sentiment: 'Bullish',
+        sentiment_score: 85,
+        key_points_hu: [
+          'A Layer 2 megoldások egyre népszerűbbek.',
+          'A zkSync és StarkNet vezető szerepet töltenek be.',
+          'Az Ethereum skálázhatósága javul.'
+        ],
+        key_points_en: [
+          'Layer 2 solutions are becoming more popular.',
+          'zkSync and StarkNet are taking leading roles.',
+          'Ethereum scalability is improving.'
+        ],
+        main_topics: ['Layer 2', 'Ethereum Scaling']
+      }
+    ]
   }
 };
 
