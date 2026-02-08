@@ -1,0 +1,4 @@
+project_id = "gxlcmcvndfkbhyyckkdv"
+
+[functions.video-chat]
+verify_jwt = false

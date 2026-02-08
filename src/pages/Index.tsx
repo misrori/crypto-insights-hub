@@ -1,78 +1,70 @@
 import { useState, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { YouTuberSidebar } from '@/components/YouTuberSidebar';
-import { DatePicker } from '@/components/DatePicker';
-import { VideoCard } from '@/components/VideoCard';
-import { StatsOverview } from '@/components/StatsOverview';
+import { DaySection } from '@/components/DaySection';
+import { SentimentChart } from '@/components/SentimentChart';
 import { YOUTUBERS, VideoSummary } from '@/types/video';
-import { getAvailableDates, getVideosByDate, getAllVideosForDate } from '@/data/mockData';
-import { Video, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { mockVideos, getAvailableDates, getVideosByDate } from '@/data/mockData';
+import { Filter, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
   const [language, setLanguage] = useState<'hu' | 'en'>('hu');
-  const [selectedDate, setSelectedDate] = useState<string | null>(() => {
-    const dates = getAvailableDates();
-    return dates.length > 0 ? dates[0] : null;
-  });
   const [selectedYouTuber, setSelectedYouTuber] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showChart, setShowChart] = useState(true);
 
   const availableDates = useMemo(() => getAvailableDates(), []);
 
-  const videos = useMemo(() => {
-    if (!selectedDate) return [];
+  const videosByDay = useMemo(() => {
+    const result: Record<string, Array<VideoSummary & { _youtuberName: string }>> = {};
     
-    const videosByYouTuber = getVideosByDate(selectedDate);
-    
-    if (selectedYouTuber) {
-      const youtuber = YOUTUBERS.find(yt => yt.id === selectedYouTuber);
-      return (videosByYouTuber[selectedYouTuber] || []).map(v => ({
-        ...v,
-        _youtuberName: youtuber?.displayName || ''
-      }));
-    }
-    
-    // Flatten all videos and add YouTuber name
-    const allVideos: Array<VideoSummary & { _youtuberName: string }> = [];
-    Object.entries(videosByYouTuber).forEach(([ytId, vids]) => {
-      const youtuber = YOUTUBERS.find(yt => yt.id === ytId);
-      vids.forEach(v => {
-        allVideos.push({
-          ...v,
-          _youtuberName: youtuber?.displayName || ''
+    availableDates.forEach(date => {
+      const videosByYouTuber = getVideosByDate(date);
+      const dayVideos: Array<VideoSummary & { _youtuberName: string }> = [];
+      
+      Object.entries(videosByYouTuber).forEach(([ytId, vids]) => {
+        if (selectedYouTuber && ytId !== selectedYouTuber) return;
+        
+        const youtuber = YOUTUBERS.find(yt => yt.id === ytId);
+        vids.forEach(v => {
+          dayVideos.push({
+            ...v,
+            _youtuberName: youtuber?.displayName || ''
+          });
         });
       });
+      
+      if (dayVideos.length > 0) {
+        // Sort by published time (newest first)
+        dayVideos.sort((a, b) => 
+          new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+        );
+        result[date] = dayVideos;
+      }
     });
     
-    return allVideos;
-  }, [selectedDate, selectedYouTuber]);
+    return result;
+  }, [availableDates, selectedYouTuber]);
 
   const videoCounts = useMemo(() => {
-    if (!selectedDate) return {};
-    
-    const videosByYouTuber = getVideosByDate(selectedDate);
     const counts: Record<string, number> = {};
     
     YOUTUBERS.forEach(yt => {
-      counts[yt.id] = (videosByYouTuber[yt.id] || []).length;
+      let total = 0;
+      availableDates.forEach(date => {
+        const videosByYouTuber = getVideosByDate(date);
+        total += (videosByYouTuber[yt.id] || []).length;
+      });
+      counts[yt.id] = total;
     });
     
     return counts;
-  }, [selectedDate]);
+  }, [availableDates]);
 
-  const getYouTuberName = (url: string, videoTitle: string) => {
-    // Find which YouTuber this video belongs to
-    for (const yt of YOUTUBERS) {
-      const videosByDate = getVideosByDate(selectedDate || '');
-      const ytVideos = videosByDate[yt.id] || [];
-      if (ytVideos.some(v => v.url === url)) {
-        return yt.displayName;
-      }
-    }
-    return '';
-  };
+  const totalVideos = useMemo(() => {
+    return Object.values(videosByDay).reduce((sum, videos) => sum + videos.length, 0);
+  }, [videosByDay]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -123,63 +115,68 @@ const Index = () => {
           )}
         >
           <div className="container mx-auto px-4 py-6 max-w-6xl">
-            {/* Date Picker */}
-            <div className="mb-6">
-              <DatePicker
-                dates={availableDates}
-                selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
-              />
-            </div>
-
-            {/* Stats Overview */}
-            <div className="mb-8">
-              <StatsOverview videos={videos} />
-            </div>
-
-            {/* Content Header */}
+            {/* Page Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="font-display text-2xl font-bold text-foreground">
+                <h1 className="font-display text-3xl font-bold text-foreground">
                   {selectedYouTuber 
                     ? YOUTUBERS.find(yt => yt.id === selectedYouTuber)?.displayName 
-                    : 'Összes videó'
+                    : language === 'hu' ? 'Összes videó' : 'All Videos'
                   }
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {videos.length} videó {selectedDate && `• ${new Date(selectedDate).toLocaleDateString('hu-HU', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}`}
+                </h1>
+                <p className="text-muted-foreground">
+                  {totalVideos} {language === 'hu' ? 'videó' : 'videos'} • {Object.keys(videosByDay).length} {language === 'hu' ? 'nap' : 'days'}
                 </p>
               </div>
+              
+              <button
+                onClick={() => setShowChart(!showChart)}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg border transition-all',
+                  showChart 
+                    ? 'bg-primary/10 border-primary/30 text-primary' 
+                    : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {language === 'hu' ? 'Grafikon' : 'Chart'}
+                </span>
+              </button>
             </div>
 
-            {/* Video Grid */}
-            {videos.length > 0 ? (
-              <div className="grid gap-6 md:grid-cols-2">
-                {videos.map((video, index) => (
-                  <VideoCard 
-                    key={`${video.video_id}-${index}`} 
-                    video={video} 
-                    language={language}
-                    youtuberName={(video as any)._youtuberName}
-                  />
-                ))}
+            {/* Sentiment Chart */}
+            {showChart && (
+              <div className="mb-8">
+                <SentimentChart data={mockVideos} language={language} />
               </div>
-            ) : (
+            )}
+
+            {/* Daily Sections */}
+            <div className="space-y-0">
+              {Object.entries(videosByDay).map(([date, videos], index) => (
+                <DaySection
+                  key={date}
+                  date={date}
+                  videos={videos}
+                  language={language}
+                  isFirst={index === 0}
+                />
+              ))}
+            </div>
+
+            {Object.keys(videosByDay).length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-                  <Video className="h-8 w-8 text-muted-foreground" />
+                  <Filter className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-display font-semibold text-lg text-foreground mb-2">
-                  Nincs videó
+                  {language === 'hu' ? 'Nincs videó' : 'No videos'}
                 </h3>
                 <p className="text-muted-foreground text-sm max-w-sm">
                   {language === 'hu' 
-                    ? 'Erre a napra vagy YouTuberre nincs elérhető videó összefoglaló.'
-                    : 'No video summaries available for this date or YouTuber.'
+                    ? 'Erre a YouTuberre nincs elérhető videó összefoglaló.'
+                    : 'No video summaries available for this YouTuber.'
                   }
                 </p>
               </div>
