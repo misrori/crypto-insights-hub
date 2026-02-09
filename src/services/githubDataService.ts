@@ -4,6 +4,9 @@ const GITHUB_REPO = 'misrori/daily_news';
 const GITHUB_BRANCH = 'main';
 const DATA_PATH = 'data';
 
+// Only fetch data from this date onwards
+const MIN_DATE = '2026-02-01';
+
 // GitHub raw content URL
 const getRawUrl = (path: string) => 
   `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${path}`;
@@ -25,13 +28,19 @@ interface RawVideoData {
   sort_date: string;
   url: string;
   transcript?: string;
-  summary_hu: string;
-  summary_en: string;
-  crypto_sentiment: 'Bullish' | 'Bearish' | 'Neutral';
-  sentiment_score: number;
-  key_points_hu: string[];
-  key_points_en: string[];
-  main_topics: string[];
+  summary_hu?: string;
+  summary_en?: string;
+  crypto_sentiment?: 'Bullish' | 'Bearish' | 'Neutral';
+  sentiment_score?: number;
+  key_points_hu?: string[];
+  key_points_en?: string[];
+  main_topics?: string[];
+}
+
+// Check if a video has a valid summary
+function hasValidSummary(video: RawVideoData): boolean {
+  return !!(video.summary_hu && video.summary_hu.trim() !== '') || 
+         !!(video.summary_en && video.summary_en.trim() !== '');
 }
 
 // Cache for fetched data
@@ -49,9 +58,9 @@ export async function getAvailableDates(): Promise<string[]> {
     
     const files: GitHubFile[] = await response.json();
     
-    // Filter only directories (dates) and sort descending (newest first)
+    // Filter only directories (dates) from MIN_DATE onwards and sort descending (newest first)
     const dates = files
-      .filter(f => f.type === 'dir' && /^\d{4}-\d{2}-\d{2}$/.test(f.name))
+      .filter(f => f.type === 'dir' && /^\d{4}-\d{2}-\d{2}$/.test(f.name) && f.name >= MIN_DATE)
       .map(f => f.name)
       .sort((a, b) => b.localeCompare(a));
     
@@ -100,21 +109,24 @@ export async function getVideoDataForDate(
     // Handle both single video object and array of videos
     const videos: RawVideoData[] = Array.isArray(data) ? data : [data];
     
-    return videos.map(video => ({
-      video_id: video.video_id,
-      title: video.title,
-      published_at: video.published_at,
-      sort_date: video.sort_date || date,
-      url: video.url,
-      transcript: video.transcript,
-      summary_hu: video.summary_hu,
-      summary_en: video.summary_en,
-      crypto_sentiment: video.crypto_sentiment,
-      sentiment_score: video.sentiment_score,
-      key_points_hu: video.key_points_hu || [],
-      key_points_en: video.key_points_en || [],
-      main_topics: video.main_topics || [],
-    }));
+    // Filter only videos that have a valid summary
+    return videos
+      .filter(hasValidSummary)
+      .map(video => ({
+        video_id: video.video_id,
+        title: video.title,
+        published_at: video.published_at,
+        sort_date: video.sort_date || date,
+        url: video.url,
+        transcript: video.transcript,
+        summary_hu: video.summary_hu || '',
+        summary_en: video.summary_en || '',
+        crypto_sentiment: video.crypto_sentiment || 'Neutral',
+        sentiment_score: video.sentiment_score || 50,
+        key_points_hu: video.key_points_hu || [],
+        key_points_en: video.key_points_en || [],
+        main_topics: video.main_topics || [],
+      }));
   } catch (error) {
     console.error(`Error fetching video data for ${date}/${youtuber}:`, error);
     return [];
