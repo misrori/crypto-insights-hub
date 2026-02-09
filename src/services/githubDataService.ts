@@ -7,19 +7,25 @@ const DATA_PATH = 'data';
 // Only fetch data from this date onwards
 const MIN_DATE = '2026-02-01';
 
-// GitHub raw content URL
+// Known YouTubers to check for each date
+const KNOWN_YOUTUBERS = [
+  'CoinBureau',
+  'IvanOnTech',
+  'DataDispatch',
+  'FelixFriends',
+  'TomNashTV',
+  'elliotrades_official',
+  'CTOLARSSON',
+  'DavidCarbutt',
+  'coingecko',
+  'AltcoinDaily',
+  'BitBoy',
+  'CryptoWendyO',
+];
+
+// GitHub raw content URL (no rate limit)
 const getRawUrl = (path: string) => 
   `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${path}`;
-
-// GitHub API URL for directory listing
-const getApiUrl = (path: string) => 
-  `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}?ref=${GITHUB_BRANCH}`;
-
-interface GitHubFile {
-  name: string;
-  path: string;
-  type: 'file' | 'dir';
-}
 
 interface RawVideoData {
   video_id: string;
@@ -48,47 +54,21 @@ let dataCache: Record<string, Record<string, VideoSummary[]>> | null = null;
 let lastFetchTime: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export async function getAvailableDates(): Promise<string[]> {
-  try {
-    const response = await fetch(getApiUrl(DATA_PATH));
-    if (!response.ok) {
-      console.error('Failed to fetch dates from GitHub:', response.status);
-      return [];
-    }
-    
-    const files: GitHubFile[] = await response.json();
-    
-    // Filter only directories (dates) from MIN_DATE onwards and sort descending (newest first)
-    const dates = files
-      .filter(f => f.type === 'dir' && /^\d{4}-\d{2}-\d{2}$/.test(f.name) && f.name >= MIN_DATE)
-      .map(f => f.name)
-      .sort((a, b) => b.localeCompare(a));
-    
-    return dates;
-  } catch (error) {
-    console.error('Error fetching available dates:', error);
-    return [];
+// Generate date range from MIN_DATE to today
+function generateDateRange(): string[] {
+  const dates: string[] = [];
+  const today = new Date();
+  const minDate = new Date(MIN_DATE);
+  
+  // Start from today and go backwards to MIN_DATE
+  const current = new Date(today);
+  while (current >= minDate) {
+    const dateStr = current.toISOString().split('T')[0];
+    dates.push(dateStr);
+    current.setDate(current.getDate() - 1);
   }
-}
-
-export async function getYouTuberFilesForDate(date: string): Promise<string[]> {
-  try {
-    const response = await fetch(getApiUrl(`${DATA_PATH}/${date}`));
-    if (!response.ok) {
-      console.error(`Failed to fetch files for ${date}:`, response.status);
-      return [];
-    }
-    
-    const files: GitHubFile[] = await response.json();
-    
-    // Filter only JSON files
-    return files
-      .filter(f => f.type === 'file' && f.name.endsWith('.json'))
-      .map(f => f.name.replace('.json', ''));
-  } catch (error) {
-    console.error(`Error fetching files for ${date}:`, error);
-    return [];
-  }
+  
+  return dates;
 }
 
 export async function getVideoDataForDate(
@@ -100,7 +80,10 @@ export async function getVideoDataForDate(
     const response = await fetch(url);
     
     if (!response.ok) {
-      console.error(`Failed to fetch ${youtuber} data for ${date}:`, response.status);
+      // 404 is expected if the YouTuber didn't post that day
+      if (response.status !== 404) {
+        console.error(`Failed to fetch ${youtuber} data for ${date}:`, response.status);
+      }
       return [];
     }
     
@@ -128,13 +111,13 @@ export async function getVideoDataForDate(
         main_topics: video.main_topics || [],
       }));
   } catch (error) {
-    console.error(`Error fetching video data for ${date}/${youtuber}:`, error);
+    // Silent fail for network errors on individual files
     return [];
   }
 }
 
 export async function fetchAllVideos(
-  daysToFetch: number = 30
+  daysToFetch: number = 14
 ): Promise<Record<string, Record<string, VideoSummary[]>>> {
   // Check cache
   if (dataCache && Date.now() - lastFetchTime < CACHE_DURATION) {
@@ -144,16 +127,16 @@ export async function fetchAllVideos(
   const result: Record<string, Record<string, VideoSummary[]>> = {};
   
   try {
-    // Get available dates
-    const allDates = await getAvailableDates();
+    // Generate dates from today backwards to MIN_DATE
+    const allDates = generateDateRange();
     const dates = allDates.slice(0, daysToFetch);
+    
+    console.log(`Fetching videos for ${dates.length} dates...`);
     
     // Fetch data for each date in parallel
     const datePromises = dates.map(async (date) => {
-      const youtubers = await getYouTuberFilesForDate(date);
-      
-      // Fetch all YouTuber data for this date in parallel
-      const videoPromises = youtubers.map(async (youtuber) => {
+      // Try all known YouTubers for this date in parallel
+      const videoPromises = KNOWN_YOUTUBERS.map(async (youtuber) => {
         const videos = await getVideoDataForDate(date, youtuber);
         return { youtuber, videos };
       });
@@ -177,6 +160,8 @@ export async function fetchAllVideos(
         result[date] = data;
       }
     });
+    
+    console.log(`Loaded ${Object.keys(result).length} dates with videos`);
     
     // Update cache
     dataCache = result;
