@@ -1,17 +1,23 @@
 import { User, CheckCircle2 } from 'lucide-react';
-import { YouTuber, YOUTUBERS } from '@/types/video';
 import { cn } from '@/lib/utils';
+
+interface YouTuberInfo {
+  id: string;
+  displayName: string;
+}
 
 interface YouTuberSidebarProps {
   selectedYouTuber: string | null;
   onYouTuberSelect: (youtuberId: string | null) => void;
   videoCounts?: Record<string, number>;
+  youtubers: YouTuberInfo[];
 }
 
 export const YouTuberSidebar = ({ 
   selectedYouTuber, 
   onYouTuberSelect,
-  videoCounts = {}
+  videoCounts = {},
+  youtubers
 }: YouTuberSidebarProps) => {
   return (
     <div className="space-y-2">
@@ -42,7 +48,7 @@ export const YouTuberSidebar = ({
       </button>
 
       {/* Individual YouTubers */}
-      {YOUTUBERS.map((youtuber) => {
+      {youtubers.map((youtuber) => {
         const videoCount = videoCounts[youtuber.id] || 0;
         const isSelected = selectedYouTuber === youtuber.id;
         

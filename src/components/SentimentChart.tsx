@@ -1,13 +1,19 @@
 import { useMemo, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { YOUTUBERS, VideoSummary } from '@/types/video';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { VideoSummary } from '@/types/video';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TrendingUp } from 'lucide-react';
 
+interface YouTuberInfo {
+  id: string;
+  displayName: string;
+}
+
 interface SentimentChartProps {
   data: Record<string, Record<string, VideoSummary[]>>;
   language: 'hu' | 'en';
+  youtubers: YouTuberInfo[];
 }
 
 const COLORS = [
@@ -17,12 +23,25 @@ const COLORS = [
   '#f59e0b',
   '#ec4899',
   '#8b5cf6',
+  '#06b6d4',
+  '#10b981',
+  '#f97316',
+  '#6366f1',
 ];
 
-export const SentimentChart = ({ data, language }: SentimentChartProps) => {
+export const SentimentChart = ({ data, language, youtubers }: SentimentChartProps) => {
   const [selectedYouTubers, setSelectedYouTubers] = useState<string[]>(
-    YOUTUBERS.map(yt => yt.id)
+    youtubers.map(yt => yt.id)
   );
+
+  // Update selection when youtubers change
+  useMemo(() => {
+    setSelectedYouTubers(prev => {
+      const validIds = youtubers.map(yt => yt.id);
+      const filtered = prev.filter(id => validIds.includes(id));
+      return filtered.length > 0 ? filtered : validIds;
+    });
+  }, [youtubers]);
 
   const chartData = useMemo(() => {
     const dates = Object.keys(data).sort((a, b) => a.localeCompare(b));
@@ -39,7 +58,7 @@ export const SentimentChart = ({ data, language }: SentimentChartProps) => {
       let totalScore = 0;
       let count = 0;
       
-      YOUTUBERS.forEach(yt => {
+      youtubers.forEach(yt => {
         const videos = data[date]?.[yt.id] || [];
         if (videos.length > 0) {
           const avgScore = videos.reduce((sum, v) => sum + v.sentiment_score, 0) / videos.length;
@@ -55,7 +74,7 @@ export const SentimentChart = ({ data, language }: SentimentChartProps) => {
       
       return dayData;
     });
-  }, [data, selectedYouTubers, language]);
+  }, [data, selectedYouTubers, language, youtubers]);
 
   const toggleYouTuber = (id: string) => {
     setSelectedYouTubers(prev => 
@@ -73,7 +92,7 @@ export const SentimentChart = ({ data, language }: SentimentChartProps) => {
       },
     };
     
-    YOUTUBERS.forEach((yt, i) => {
+    youtubers.forEach((yt, i) => {
       config[yt.id] = {
         label: yt.displayName,
         color: COLORS[i % COLORS.length],
@@ -81,7 +100,11 @@ export const SentimentChart = ({ data, language }: SentimentChartProps) => {
     });
     
     return config;
-  }, [language]);
+  }, [language, youtubers]);
+
+  if (youtubers.length === 0) {
+    return null;
+  }
 
   return (
     <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-6">
@@ -101,7 +124,7 @@ export const SentimentChart = ({ data, language }: SentimentChartProps) => {
 
       {/* YouTuber Filter */}
       <div className="flex flex-wrap gap-3 mb-6 pb-4 border-b border-border/50">
-        {YOUTUBERS.map((yt, i) => (
+        {youtubers.map((yt, i) => (
           <label 
             key={yt.id}
             className="flex items-center gap-2 cursor-pointer group"
@@ -153,7 +176,7 @@ export const SentimentChart = ({ data, language }: SentimentChartProps) => {
           />
           
           {/* YouTuber Lines */}
-          {YOUTUBERS.map((yt, i) => (
+          {youtubers.map((yt, i) => (
             selectedYouTubers.includes(yt.id) && (
               <Line
                 key={yt.id}
