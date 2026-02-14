@@ -1,8 +1,11 @@
 export interface VideoSummary {
+  channel_name: string;
+  channel_id: string;
+  channel_handle: string;
   video_id: string;
   title: string;
   published_at: string;
-  sort_date: string;
+  sort_data: string;
   url: string;
   transcript?: string;
   summary_hu: string;
@@ -22,6 +25,7 @@ export interface YouTuber {
 }
 
 export const YOUTUBERS: YouTuber[] = [
+  { id: 'coinbureau', name: 'coinbureau', displayName: 'Coin Bureau' },
   { id: 'CTOLARSSON', name: 'CTOLARSSON', displayName: 'CTO Larsson' },
   { id: 'DataDispatch', name: 'DataDispatch', displayName: 'Data Dispatch' },
   { id: 'DavidCarbutt', name: 'DavidCarbutt', displayName: 'David Carbutt' },

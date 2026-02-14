@@ -3,7 +3,7 @@ import { ExternalLink, TrendingUp, TrendingDown, Minus, User, MessageSquare } fr
 import { VideoSummary } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, decodeHtmlEntities } from '@/lib/utils';
 import { VideoAIChat } from './VideoAIChat';
 
 interface VideoCardProps {
@@ -37,8 +37,8 @@ export const VideoCard = ({ video, language = 'hu', youtuberName }: VideoCardPro
     }
   };
 
-  const summary = language === 'hu' ? video.summary_hu : video.summary_en;
-  const keyPoints = language === 'hu' ? video.key_points_hu : video.key_points_en;
+  const summary = decodeHtmlEntities(language === 'hu' ? video.summary_hu : video.summary_en);
+  const keyPoints = (language === 'hu' ? video.key_points_hu : video.key_points_en).map(point => decodeHtmlEntities(point));
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -50,13 +50,13 @@ export const VideoCard = ({ video, language = 'hu', youtuberName }: VideoCardPro
       <div className="group relative rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 animate-slide-up">
         {/* Glow effect on hover */}
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
+
         <div className="relative z-10">
           {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex-1">
               <h3 className="font-display font-semibold text-lg text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                {video.title}
+                {decodeHtmlEntities(video.title)}
               </h3>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <span>{formatTime(video.published_at)}</span>
@@ -71,7 +71,7 @@ export const VideoCard = ({ video, language = 'hu', youtuberName }: VideoCardPro
                 )}
               </div>
             </div>
-            
+
             <div className="flex gap-2 shrink-0">
               <Button
                 variant="outline"
@@ -96,18 +96,18 @@ export const VideoCard = ({ video, language = 'hu', youtuberName }: VideoCardPro
 
           {/* Sentiment & Topics */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={cn('flex items-center gap-1.5 px-3 py-1', getSentimentColor())}
             >
               {getSentimentIcon()}
               {video.crypto_sentiment}
               <span className="ml-1 opacity-75">({video.sentiment_score}%)</span>
             </Badge>
-            
+
             {video.main_topics.slice(0, 2).map((topic, index) => (
-              <Badge 
-                key={index} 
+              <Badge
+                key={index}
                 variant="outline"
                 className="bg-secondary/50 text-secondary-foreground border-border px-3 py-1"
               >
@@ -128,8 +128,8 @@ export const VideoCard = ({ video, language = 'hu', youtuberName }: VideoCardPro
             </h4>
             <ul className="space-y-1.5">
               {keyPoints.map((point, index) => (
-                <li 
-                  key={index} 
+                <li
+                  key={index}
                   className="flex items-start gap-2 text-sm text-foreground/80"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
@@ -144,7 +144,7 @@ export const VideoCard = ({ video, language = 'hu', youtuberName }: VideoCardPro
       {/* AI Chat Modal */}
       {showAIChat && (
         <VideoAIChat
-          videoTitle={video.title}
+          videoTitle={decodeHtmlEntities(video.title)}
           transcript={video.transcript}
           summary={summary}
           keyPoints={keyPoints}
